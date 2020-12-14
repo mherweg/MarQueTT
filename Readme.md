@@ -16,7 +16,7 @@ Copy `local_config.dist.h` to `local_config.h` and configure to your needs.
 - ledMatrix/delay: 10 = fastest, 1000 = slowest scrolling
 - ledMatrix/blink: 0 = no blinking; 1 = fastest, 1000 = slowest blinking
 - ledMatrix/enable: 0 = display off, 1 = display on
-
+- ledMatrix/kanal: 0..9  adds more channels: ledMatrix/text/1 ...
 #### Published by Marquee
 
 - ledMatrix/status: startup, reconnect, repeat
