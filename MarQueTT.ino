@@ -5,8 +5,10 @@
 #include "local_config.h"
 
 uint8_t text[MAX_TEXT_LENGTH];
-
-
+char topic_buf[17] = "ledMatrix/text/1";
+String  topic_new = "";
+char kanal ;
+char kanal_alt ;
 
 LEDMatrixDriver led(LEDMATRIX_SEGMENTS, LEDMATRIX_CS_PIN, 0);
 uint16_t textIndex = 0;
@@ -123,6 +125,38 @@ void callback(char* topic, byte* payload, unsigned int length) {
     return;
   }
 
+/* topic: "ledMatrix/kanal"
+ * kanal = 0  Display zeigt message vom Topic  "ledMatrix/text"
+ * kanal = 1  Display zeigt message vom Topic  "ledMatrix/text/1" 
+ * kanal = 2  Display zeigt message vom Topic  "ledMatrix/text/2"
+ * .
+ * .
+ * .
+ * kanal = 9  Display zeigt message vom Topic  "ledMatrix/text/9"
+ * 
+ */
+  if (!strcmp(topic, "ledMatrix/kanal")) {
+    kanal_alt = kanal;
+    kanal = payload[0];
+    Serial.print("kanal:");
+    Serial.println(kanal);
+    if ( kanal == '0')
+    {
+      topic_new = "ledMatrix/text";
+    }
+    else
+    {
+      topic_new = "ledMatrix/text/" ;
+      topic_new.concat(kanal) ;
+    }
+    topic_new.toCharArray(topic_buf, 17);
+    Serial.print("subscribing topic:");
+    Serial.println(topic_buf);
+    client.subscribe( topic_buf );
+    
+  }
+
+
   if (!strcmp(topic, "ledMatrix/blink")) {
     blinkDelay = 0;
     for (int i = 0 ; i < length;  i++) {
@@ -150,7 +184,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
   }
 
 
-  if (!strcmp(topic, "ledMatrix/text")) {
+  if (!strcmp(topic, topic_buf)) {
     const bool pr = 0;                                // set to 1 for debug prints
     if (pr) printHex8(payload, length);
     text[0] = ' ';
@@ -248,8 +282,9 @@ void reconnect() {
       client.subscribe("ledMatrix/enable");
       client.subscribe("ledMatrix/intensity");
       client.subscribe("ledMatrix/delay");
-      client.subscribe("ledMatrix/text");
+      client.subscribe("ledMatrix/text-m");
       client.subscribe("ledMatrix/blink");
+      client.subscribe("ledMatrix/kanal");
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
